@@ -7,6 +7,7 @@ import { connectDatabase } from './config/database';
 import Config from './config/config';
 import { swaggerSpec } from './config/swagger';
 import { registerControllers } from './utils/router';
+import { AuthController } from './controllers/AuthController';
 import { UserController } from './controllers/UserController';
 import { BloodRequestController } from './controllers/BloodRequestController';
 import { LocationController } from './controllers/LocationController';
@@ -46,7 +47,7 @@ class App {
     const apiRouter = express.Router();
 
     // Register decorated controllers
-    registerControllers(apiRouter, [UserController, BloodRequestController, LocationController]);
+    registerControllers(apiRouter, [AuthController, UserController, BloodRequestController, LocationController]);
 
     // Mount API router
     this.app.use(Config.API_PREFIX, apiRouter);
