@@ -7,6 +7,7 @@ import { connectDatabase } from '../src/config/database';
 import Config from '../src/config/config';
 import { swaggerSpec } from '../src/config/swagger';
 import { registerControllers } from '../src/utils/router';
+import { AuthController } from '../src/controllers/AuthController';
 import { UserController } from '../src/controllers/UserController';
 import { BloodRequestController } from '../src/controllers/BloodRequestController';
 import { LocationController } from '../src/controllers/LocationController';
@@ -40,7 +41,7 @@ app.get('/api-docs', swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // API routes
 const apiRouter = express.Router();
-registerControllers(apiRouter, [UserController, BloodRequestController, LocationController]);
+registerControllers(apiRouter, [AuthController, UserController, BloodRequestController, LocationController]);
 app.use(Config.API_PREFIX, apiRouter);
 
 // Database connection state
