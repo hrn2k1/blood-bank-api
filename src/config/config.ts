@@ -4,7 +4,7 @@ export class Config {
   static readonly PORT = process.env.PORT || 3000;
   static readonly NODE_ENV = process.env.NODE_ENV || 'development';
   static readonly MONGODB_URI = process.env.MONGODB_URI || '';
-  static readonly API_PREFIX = process.env.API_PREFIX || '/api/v1';
+  static readonly API_PREFIX = process.env.API_PREFIX || '/api';
 
   static isDevelopment(): boolean {
     return this.NODE_ENV === 'development';

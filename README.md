@@ -125,10 +125,10 @@ Once the server is running:
 curl http://localhost:3000/health
 
 # Get all donors (via Swagger UI or terminal)
-curl http://localhost:3000/api/v1/donors
+curl http://localhost:3000/api/donors
 
 # Create a donor
-curl -X POST http://localhost:3000/api/v1/donors \
+curl -X POST http://localhost:3000/api/donors \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "John",
@@ -145,7 +145,7 @@ curl -X POST http://localhost:3000/api/v1/donors \
 
 ### Base URL
 ```
-http://localhost:3000/api/v1
+http://localhost:3000/api
 ```
 
 ### Donor Endpoints
@@ -163,12 +163,12 @@ http://localhost:3000/api/v1
 
 **Get all donors:**
 ```bash
-curl http://localhost:3000/api/v1/donors
+curl http://localhost:3000/api/donors
 ```
 
 **Create a donor:**
 ```bash
-curl -X POST http://localhost:3000/api/v1/donors \
+curl -X POST http://localhost:3000/api/donors \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "John",
@@ -181,7 +181,7 @@ curl -X POST http://localhost:3000/api/v1/donors \
 
 **Get donors by blood type:**
 ```bash
-curl http://localhost:3000/api/v1/donors/blood-type/O+
+curl http://localhost:3000/api/donors/blood-type/O+
 ```
 
 ## Decorator Pattern Implementation
@@ -223,7 +223,7 @@ Available decorators:
 | `PORT` | Server port | `3000` |
 | `NODE_ENV` | Environment | `development` or `production` |
 | `MONGODB_URI` | MongoDB connection string | `mongodb+srv://...` |
-| `API_PREFIX` | API route prefix | `/api/v1` |
+| `API_PREFIX` | API route prefix | `/api` |
 
 ## Extending the Project
 

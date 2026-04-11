@@ -8,7 +8,6 @@ import Config from './config/config';
 import { swaggerSpec } from './config/swagger';
 import { registerControllers } from './utils/router';
 import { UserController } from './controllers/UserController';
-import { AuthController } from './controllers/AuthController';
 import { BloodRequestController } from './controllers/BloodRequestController';
 import { LocationController } from './controllers/LocationController';
 
@@ -47,7 +46,7 @@ class App {
     const apiRouter = express.Router();
 
     // Register decorated controllers
-    registerControllers(apiRouter, [AuthController, UserController, BloodRequestController, LocationController]);
+    registerControllers(apiRouter, [UserController, BloodRequestController, LocationController]);
 
     // Mount API router
     this.app.use(Config.API_PREFIX, apiRouter);
@@ -64,12 +63,12 @@ class App {
 ╔════════════════════════════════════════════════════════╗
 ║          Blood Bank API Server Running                 ║
 ╠════════════════════════════════════════════════════════╣
-║ Environment: ${Config.NODE_ENV.padEnd(40)} ║
-║ Port: ${String(this.port).padEnd(47)} ║
-║ API Prefix: ${Config.API_PREFIX.padEnd(43)} ║
-║ Database: Connected                                   ║
+║ Environment: ${Config.NODE_ENV.padEnd(41)} ║
+║ Port: ${String(this.port).padEnd(48)} ║
+║ API Prefix: ${Config.API_PREFIX.padEnd(42)} ║
+║ Database: Connected                                    ║
 ║                                                        ║
-║ Swagger UI: http://localhost:${this.port}/api-docs    ║
+║ Swagger UI: http://localhost:${this.port}/api-docs             ║
 ╚════════════════════════════════════════════════════════╝
         `);
       });
