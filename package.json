@@ -4,11 +4,12 @@
   "description": "Blood Bank Management API built with TypeScript, Express, and MongoDB",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "watch": "tsc -w",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "fix-db": "ts-node src/utils/fixDatabase.ts"
   },
   "keywords": [
     "blood-bank",
@@ -39,6 +40,7 @@
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "eslint": "^8.50.0",
+    "nodemon": "^3.1.14",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   }

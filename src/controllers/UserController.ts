@@ -14,7 +14,7 @@ import { UserService } from '../services/UserService';
  * /users:
  *   get:
  *     summary: Get all users
- *     description: Retrieve a list of all users and blood banks
+ *     description: Retrieve a list of all users and blood banks with optional filters
  *     tags:
  *       - Users
  *     parameters:
@@ -37,13 +37,44 @@ import { UserService } from '../services/UserService';
  *     responses:
  *       200:
  *         description: List of users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *             example:
+ *               success: true
+ *               data:
+ *                 - id: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                   name: "John Doe"
+ *                   contactNumber: "+880123456789"
+ *                   email: "john.doe@example.com"
+ *                   type: "user"
+ *                   divisionId: 1
+ *                   districtId: 1
+ *                   areaId: 1
+ *                   registrationDate: "2024-06-01T00:00:00Z"
+ *                   props:
+ *                     address: "Sheikhpara, Joypurhat"
+ *                     bloodGroup: "A+"
+ *                     gender: "Male"
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
+
 /**
  * @swagger
  * /users:
  *   post:
  *     summary: Create a new user
- *     description: Register a new user or blood bank
+ *     description: Register a new user or blood bank in the system
  *     tags:
  *       - Users
  *     requestBody:
@@ -53,7 +84,6 @@ import { UserService } from '../services/UserService';
  *           schema:
  *             type: object
  *             required:
- *               - id
  *               - name
  *               - contactNumber
  *               - email
@@ -64,8 +94,6 @@ import { UserService } from '../services/UserService';
  *               - areaId
  *               - registrationDate
  *             properties:
- *               id:
- *                 type: string
  *               name:
  *                 type: string
  *               contactNumber:
@@ -91,7 +119,187 @@ import { UserService } from '../services/UserService';
  *                 format: date-time
  *               props:
  *                 type: object
+ *           example:
+ *             name: "John Doe"
+ *             contactNumber: "+880123456789"
+ *             email: "john.doe@example.com"
+ *             password: "Pass@123"
+ *             type: "user"
+ *             divisionId: 1
+ *             districtId: 1
+ *             areaId: 1
+ *             registrationDate: "2024-06-01T00:00:00Z"
+ *             props:
+ *               address: "Sheikhpara, Joypurhat"
+ *               photo: "https://example.com/photos/john_doe.jpg"
+ *               birthDate: "1985-01-01"
+ *               gender: "Male"
+ *               bloodGroup: "A+"
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *             example:
+ *               success: true
+ *               data:
+ *                 id: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                 name: "John Doe"
+ *                 contactNumber: "+880123456789"
+ *                 email: "john.doe@example.com"
+ *                 type: "user"
+ *                 divisionId: 1
+ *                 districtId: 1
+ *                 areaId: 1
+ *                 registrationDate: "2024-06-01T00:00:00Z"
+ *                 props:
+ *                   address: "Sheikhpara, Joypurhat"
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  */
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     description: Retrieve a specific user by their unique ID
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 id: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                 name: "John Doe"
+ *                 contactNumber: "+880123456789"
+ *                 email: "john.doe@example.com"
+ *                 type: "user"
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *   put:
+ *     summary: Update user
+ *     description: Update user information
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             name: "Jane Doe"
+ *             contactNumber: "+880987654321"
+ *             props:
+ *               address: "New Address, Dhaka"
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *   delete:
+ *     summary: Delete user
+ *     description: Remove a user from the system
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ */
+
+/**
+ * @swagger
+ * /users/search:
+ *   get:
+ *     summary: Search users by name
+ *     description: Search for users using a name query
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *         example: "John"
+ *     responses:
+ *       200:
+ *         description: Search results
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 - id: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                   name: "John Doe"
+ *                   email: "john@example.com"
+ */
+
+/**
+ * @swagger
+ * /users/banks/location:
+ *   get:
+ *     summary: Get blood banks by location
+ *     description: Retrieve blood banks filtered by division and optionally by district
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: query
+ *         name: divisionId
+ *         required: true
+ *         schema:
+ *           type: number
+ *         description: Division ID
+ *         example: 1
+ *       - in: query
+ *         name: districtId
+ *         schema:
+ *           type: number
+ *         description: District ID (optional)
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: List of blood banks
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 - id: "0af25096-8a67-4c44-b990-e5848ff80069"
+ *                   name: "Joypurhat Blood Bank"
+ *                   type: "bank"
+ *                   divisionId: 1
+ *                   districtId: 1
+ */
+
 /**
  * @swagger
  * /users/{id}:
@@ -114,38 +322,6 @@ import { UserService } from '../services/UserService';
  *     summary: Delete user
  *     tags:
  *       - Users
- */
-/**
- * @swagger
- * /users/search:
- *   get:
- *     summary: Search users by name
- *     tags:
- *       - Users
- *     parameters:
- *       - in: query
- *         name: q
- *         required: true
- *         schema:
- *           type: string
- */
-/**
- * @swagger
- * /users/banks/location:
- *   get:
- *     summary: Get blood banks by location
- *     tags:
- *       - Users
- *     parameters:
- *       - in: query
- *         name: divisionId
- *         required: true
- *         schema:
- *           type: number
- *       - in: query
- *         name: districtId
- *         schema:
- *           type: number
  */
 
 @Controller('/users')

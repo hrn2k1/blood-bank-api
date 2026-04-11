@@ -14,6 +14,7 @@ import { BloodRequestService } from '../services/BloodRequestService';
  * /blood-requests:
  *   get:
  *     summary: Get all blood requests
+ *     description: Retrieve blood requests with optional filters by status, blood group, or urgency
  *     tags:
  *       - Blood Requests
  *     parameters:
@@ -22,17 +23,42 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *         schema:
  *           type: string
  *           enum: [pending, approved, completed, rejected]
+ *         description: Filter by request status
  *       - in: query
  *         name: bloodGroup
  *         schema:
  *           type: string
+ *         description: Filter by blood group
  *       - in: query
  *         name: urgencyLevel
  *         schema:
  *           type: string
  *           enum: [low, medium, high, critical]
+ *         description: Filter by urgency level
+ *     responses:
+ *       200:
+ *         description: List of blood requests retrieved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 - id: "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+ *                   requesterId: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                   bankId: "0af25096-8a67-4c44-b990-e5848ff80069"
+ *                   bloodGroup: "A+"
+ *                   unitsRequired: 2
+ *                   status: "pending"
+ *                   urgencyLevel: "high"
+ *                   requestDate: "2024-06-01T00:00:00Z"
+ *                   address: "Sheikhpara, Joypurhat"
+ *                   reason: "Surgery"
+ *                   donors: []
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  *   post:
  *     summary: Create blood request
+ *     description: Submit a new blood request
  *     tags:
  *       - Blood Requests
  *     requestBody:
@@ -41,22 +67,243 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - requesterId
+ *               - bankId
+ *               - bloodGroup
+ *               - unitsRequired
+ *               - requestDate
+ *               - address
+ *               - reason
+ *               - urgencyLevel
+ *           example:
+ *             requesterId: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *             bankId: "0af25096-8a67-4c44-b990-e5848ff80069"
+ *             bloodGroup: "A+"
+ *             unitsRequired: 2
+ *             requestDate: "2024-06-01T00:00:00Z"
+ *             address: "Sheikhpara, Joypurhat"
+ *             reason: "Surgery"
+ *             urgencyLevel: "high"
+ *             comment: "Need blood for surgery"
+ *     responses:
+ *       201:
+ *         description: Blood request created successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 id: "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+ *                 requesterId: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                 bankId: "0af25096-8a67-4c44-b990-e5848ff80069"
+ *                 bloodGroup: "A+"
+ *                 unitsRequired: 2
+ *                 status: "pending"
+ *                 urgencyLevel: "high"
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
  */
+
 /**
  * @swagger
  * /blood-requests/{id}:
  *   get:
  *     summary: Get blood request by ID
+ *     description: Retrieve a specific blood request with all details
  *     tags:
  *       - Blood Requests
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+ *     responses:
+ *       200:
+ *         description: Blood request retrieved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 id: "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+ *                 requesterId: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                 bankId: "0af25096-8a67-4c44-b990-e5848ff80069"
+ *                 bloodGroup: "A+"
+ *                 unitsRequired: 2
+ *                 status: "pending"
+ *                 urgencyLevel: "high"
+ *                 donors:
+ *                   - donorId: "donor-123"
+ *                     unitsDonated: 1
+ *                     donationDate: "2024-06-02T00:00:00Z"
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  *   put:
  *     summary: Update blood request
+ *     description: Update blood request details
  *     tags:
  *       - Blood Requests
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             unitsRequired: 3
+ *             urgencyLevel: "critical"
+ *             comment: "Urgent update"
+ *     responses:
+ *       200:
+ *         description: Blood request updated successfully
  *   delete:
  *     summary: Delete blood request
+ *     description: Remove a blood request from the system
  *     tags:
  *       - Blood Requests
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Blood request deleted successfully
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /blood-requests/requester/{requesterId}:
+ *   get:
+ *     summary: Get requests by requester
+ *     description: Retrieve all blood requests made by a specific user
+ *     tags:
+ *       - Blood Requests
+ *     parameters:
+ *       - in: path
+ *         name: requesterId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *     responses:
+ *       200:
+ *         description: Requests retrieved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 - id: "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+ *                   requesterId: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                   status: "pending"
+ */
+
+/**
+ * @swagger
+ * /blood-requests/bank/{bankId}:
+ *   get:
+ *     summary: Get requests for a bank
+ *     description: Retrieve all blood requests sent to a specific blood bank
+ *     tags:
+ *       - Blood Requests
+ *     parameters:
+ *       - in: path
+ *         name: bankId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "0af25096-8a67-4c44-b990-e5848ff80069"
+ *     responses:
+ *       200:
+ *         description: Requests retrieved successfully
+ */
+
+/**
+ * @swagger
+ * /blood-requests/{id}/add-donor:
+ *   post:
+ *     summary: Add donor to request
+ *     description: Record a donation for a blood request
+ *     tags:
+ *       - Blood Requests
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             donorId: "donor-123"
+ *             unitsDonated: 1
+ *             donationDate: "2024-06-02T10:30:00Z"
+ *     responses:
+ *       200:
+ *         description: Donor added to request successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: "Donor added to request"
+ *               data:
+ *                 id: "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+ *                 donors:
+ *                   - donorId: "donor-123"
+ *                     unitsDonated: 1
+ *                     donationDate: "2024-06-02T10:30:00Z"
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /blood-requests/{id}/status:
+ *   put:
+ *     summary: Update request status
+ *     description: Change the status of a blood request
+ *     tags:
+ *       - Blood Requests
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             status: "approved"
+ *     responses:
+ *       200:
+ *         description: Request status updated successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: "Blood request status updated"
+ *               data:
+ *                 id: "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+ *                 status: "approved"
+ *       400:
+ *         description: Invalid status provided
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
  */
 
 @Controller('/blood-requests')

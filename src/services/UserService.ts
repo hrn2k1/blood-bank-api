@@ -12,7 +12,7 @@ export class UserService {
    * Get user by ID
    */
   async getUserById(id: string): Promise<IUser | null> {
-    return User.findOne({ id });
+    return User.findById(id);
   }
 
   /**
@@ -52,14 +52,14 @@ export class UserService {
    * Update user
    */
   async updateUser(id: string, userData: Partial<IUser>): Promise<IUser | null> {
-    return User.findOneAndUpdate({ id }, userData, { new: true });
+    return User.findByIdAndUpdate(id, userData, { new: true });
   }
 
   /**
    * Delete user
    */
   async deleteUser(id: string): Promise<IUser | null> {
-    return (await User.findOneAndDelete({ id })) as unknown as IUser | null;
+    return (await User.findByIdAndDelete(id)) as unknown as IUser | null;
   }
 
   /**
@@ -78,5 +78,30 @@ export class UserService {
    */
   async searchUsers(name: string): Promise<IUser[]> {
     return User.find({ name: { $regex: name, $options: 'i' } });
+  }
+
+  /**
+   * Login user with email or contact number and password
+   */
+  async login(identifier: string, password: string): Promise<IUser | null> {
+    // Find user by email or contact number
+    const user = await User.findOne({
+      $or: [
+        { email: identifier },
+        { contactNumber: identifier }
+      ]
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    // In production, use bcrypt to compare passwords
+    // For now, direct comparison (not recommended for production)
+    if (user.password !== password) {
+      return null;
+    }
+
+    return user;
   }
 }

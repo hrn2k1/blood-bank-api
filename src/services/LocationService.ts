@@ -11,8 +11,8 @@ export class LocationService {
   /**
    * Get location by ID
    */
-  async getLocationById(id: number): Promise<ILocation | null> {
-    return Location.findOne({ id });
+  async getLocationById(id: string): Promise<ILocation | null> {
+    return Location.findById(id);
   }
 
   /**
@@ -68,15 +68,15 @@ export class LocationService {
   /**
    * Update location
    */
-  async updateLocation(id: number, locationData: Partial<ILocation>): Promise<ILocation | null> {
-    return Location.findOneAndUpdate({ id }, locationData, { new: true });
+  async updateLocation(id: string, locationData: Partial<ILocation>): Promise<ILocation | null> {
+    return Location.findByIdAndUpdate(id, locationData, { new: true });
   }
 
   /**
    * Delete location
    */
-  async deleteLocation(id: number): Promise<ILocation | null> {
-    return (await Location.findOneAndDelete({ id })) as unknown as ILocation | null;
+  async deleteLocation(id: string): Promise<ILocation | null> {
+    return (await Location.findByIdAndDelete(id)) as unknown as ILocation | null;
   }
 
   /**

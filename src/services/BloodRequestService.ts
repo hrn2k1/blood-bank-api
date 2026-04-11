@@ -12,7 +12,7 @@ export class BloodRequestService {
    * Get blood request by ID
    */
   async getBloodRequestById(id: string): Promise<IBloodRequest | null> {
-    return BloodRequest.findOne({ id });
+    return BloodRequest.findById(id);
   }
 
   /**
@@ -62,22 +62,22 @@ export class BloodRequestService {
    * Update blood request
    */
   async updateBloodRequest(id: string, requestData: Partial<IBloodRequest>): Promise<IBloodRequest | null> {
-    return BloodRequest.findOneAndUpdate({ id }, requestData, { new: true });
+    return BloodRequest.findByIdAndUpdate(id, requestData, { new: true });
   }
 
   /**
    * Delete blood request
    */
   async deleteBloodRequest(id: string): Promise<IBloodRequest | null> {
-    return (await BloodRequest.findOneAndDelete({ id })) as unknown as IBloodRequest | null;
+    return (await BloodRequest.findByIdAndDelete(id)) as unknown as IBloodRequest | null;
   }
 
   /**
    * Add donor to blood request
    */
   async addDonorToRequest(requestId: string, donorData: { donorId: string; unitsDonated: number; donationDate: Date }): Promise<IBloodRequest | null> {
-    return BloodRequest.findOneAndUpdate(
-      { id: requestId },
+    return BloodRequest.findByIdAndUpdate(
+      requestId,
       { $push: { donors: donorData } },
       { new: true }
     );
@@ -87,6 +87,6 @@ export class BloodRequestService {
    * Update blood request status
    */
   async updateBloodRequestStatus(id: string, status: 'pending' | 'approved' | 'completed' | 'rejected'): Promise<IBloodRequest | null> {
-    return BloodRequest.findOneAndUpdate({ id }, { status }, { new: true });
+    return BloodRequest.findByIdAndUpdate(id, { status }, { new: true });
   }
 }

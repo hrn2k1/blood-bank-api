@@ -1,4 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
+import { randomUUID } from 'crypto';
 
 export interface IDonorRecord {
   donorId: string;
@@ -7,7 +8,6 @@ export interface IDonorRecord {
 }
 
 export interface IBloodRequest extends Document {
-  id: string;
   requesterId: string;
   bankId: string;
   bloodGroup: string;
@@ -43,10 +43,9 @@ const donorRecordSchema = new Schema<IDonorRecord>(
 
 const bloodRequestSchema = new Schema<IBloodRequest>(
   {
-    id: {
+    _id: {
       type: String,
-      required: true,
-      unique: true,
+      default: () => randomUUID(),
     },
     requesterId: {
       type: String,
@@ -90,7 +89,17 @@ const bloodRequestSchema = new Schema<IBloodRequest>(
     },
     comment: String,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+    toJSON: {
+      transform: function (doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        return ret;
+      },
+    },
+  }
 );
 
 export const BloodRequest = model<IBloodRequest>('BloodRequest', bloodRequestSchema);
