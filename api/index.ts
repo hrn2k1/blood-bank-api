@@ -26,9 +26,17 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Swagger UI
+// Swagger UI - using CDN for static assets in serverless environment
+const swaggerUiOptions = {
+  swaggerOptions: { defaultModelsExpandDepth: 2 },
+  customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css',
+  customJs: [
+    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.min.js',
+  ],
+};
 app.use('/api-docs', swaggerUi.serve);
-app.get('/api-docs', swaggerUi.setup(swaggerSpec, { swaggerOptions: { defaultModelsExpandDepth: 2 } }));
+app.get('/api-docs', swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
 // API routes
 const apiRouter = express.Router();
