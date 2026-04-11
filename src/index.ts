@@ -79,20 +79,44 @@ class App {
   }
 }
 
-// Start the application
-const app = new App();
-app.start().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+// Create the application instance
+const appInstance = new App();
 
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  process.exit(0);
-});
+// For Vercel serverless deployment
+// Connect to database once and export the Express app
+let isConnected = false;
 
-process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server');
-  process.exit(0);
-});
+const handler = async (req: express.Request, res: express.Response) => {
+  if (!isConnected) {
+    try {
+      await connectDatabase();
+      isConnected = true;
+    } catch (error) {
+      console.error('Database connection failed:', error);
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+  }
+  return appInstance.app(req, res);
+};
+
+// Export for Vercel
+export default handler;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  appInstance.start().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    process.exit(0);
+  });
+
+  process.on('SIGINT', () => {
+    console.log('SIGINT signal received: closing HTTP server');
+    process.exit(0);
+  });
+}
