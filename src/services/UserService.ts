@@ -83,12 +83,12 @@ export class UserService {
   /**
    * Login user with email or contact number and password
    */
-  async login(identifier: string, password: string): Promise<IUser | null> {
+  async login(loginName: string, password: string): Promise<IUser | null> {
     // Find user by email or contact number
     const user = await User.findOne({
       $or: [
-        { email: identifier },
-        { contactNumber: identifier }
+        { email: loginName },
+        { contactNumber: loginName }
       ]
     });
 

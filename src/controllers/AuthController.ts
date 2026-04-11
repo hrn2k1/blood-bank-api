@@ -24,16 +24,16 @@ import { UserService } from '../services/UserService';
  *           schema:
  *             type: object
  *             required:
- *               - identifier
+ *               - loginName
  *               - password
  *             properties:
- *               identifier:
+ *               loginName:
  *                 type: string
  *                 description: Email address or contact number
  *               password:
  *                 type: string
  *           example:
- *             identifier: "john.doe@example.com"
+ *             loginName: "john.doe@example.com"
  *             password: "Pass@123"
  *     responses:
  *       200:
@@ -174,9 +174,9 @@ export class AuthController {
   @Post('/login')
   async login(req: Request, res: Response): Promise<void> {
     try {
-      const { identifier, password } = req.body;
+      const { loginName, password } = req.body;
 
-      if (!identifier || !password) {
+      if (!loginName || !password) {
         res.status(400).json({
           success: false,
           message: 'Email/Contact number and password are required',
@@ -184,7 +184,7 @@ export class AuthController {
         return;
       }
 
-      const user = await this.userService.login(identifier, password);
+      const user = await this.userService.login(loginName, password);
 
       if (!user) {
         res.status(401).json({
@@ -193,10 +193,10 @@ export class AuthController {
         });
         return;
       }
-
+      user.password = undefined as unknown as string; // Exclude password from response
       res.json({
         success: true,
-        data: user,
+        data: user, // Exclude password from response
       });
     } catch (error) {
       res.status(500).json({
