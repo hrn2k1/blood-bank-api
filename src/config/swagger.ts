@@ -14,8 +14,8 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${Config.PORT}${Config.API_PREFIX}`,
-        description: 'Development Server',
+        url: Config.API_PREFIX,
+        description: 'Current Server',
       },
     ],
     components: {
