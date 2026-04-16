@@ -4,6 +4,7 @@ export interface RouteDefinition {
   path: string;
   method: 'get' | 'post' | 'put' | 'delete' | 'patch';
   handlerName: string;
+  authenticated?: boolean;
 }
 
 export interface ControllerMetadata {
@@ -13,6 +14,7 @@ export interface ControllerMetadata {
 
 export const CONTROLLER_PREFIX_METADATA_KEY = Symbol('CONTROLLER_PREFIX');
 export const ROUTE_METADATA_KEY = Symbol('ROUTES');
+export const AUTHENTICATED_METADATA_KEY = Symbol('AUTHENTICATED');
 
 /**
  * Controller decorator - marks a class as a controller
@@ -108,5 +110,14 @@ export function Patch(path: string = '') {
       handlerName: propertyKey,
     });
     Reflect.defineMetadata(ROUTE_METADATA_KEY, routes, target.constructor);
+  };
+}
+
+/**
+ * Authenticated decorator - marks a route as requiring authentication
+ */
+export function Authenticated() {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    Reflect.defineMetadata(AUTHENTICATED_METADATA_KEY, true, target, propertyKey);
   };
 }

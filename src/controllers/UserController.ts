@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Controller, Get, Post, Put, Delete } from '../decorators';
+import { Controller, Get, Post, Put, Delete, Authenticated } from '../decorators';
 import { UserService } from '../services/UserService';
 
 /**
@@ -17,6 +17,8 @@ import { UserService } from '../services/UserService';
  *     description: Retrieve a list of all users and blood banks with optional filters
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: type
@@ -65,6 +67,8 @@ import { UserService } from '../services/UserService';
  *                     address: "Sheikhpara, Joypurhat"
  *                     bloodGroup: "A+"
  *                     gender: "Male"
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
@@ -77,6 +81,8 @@ import { UserService } from '../services/UserService';
  *     description: Register a new user or blood bank in the system
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -163,6 +169,8 @@ import { UserService } from '../services/UserService';
  *                   address: "Sheikhpara, Joypurhat"
  *       400:
  *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  */
 
 /**
@@ -173,6 +181,8 @@ import { UserService } from '../services/UserService';
  *     description: Retrieve a specific user by their unique ID
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -193,6 +203,8 @@ import { UserService } from '../services/UserService';
  *                 contactNumber: "+880123456789"
  *                 email: "john.doe@example.com"
  *                 type: "user"
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *   put:
@@ -200,6 +212,8 @@ import { UserService } from '../services/UserService';
  *     description: Update user information
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -218,11 +232,15 @@ import { UserService } from '../services/UserService';
  *     responses:
  *       200:
  *         description: User updated successfully
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  *   delete:
  *     summary: Delete user
  *     description: Remove a user from the system
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -232,6 +250,8 @@ import { UserService } from '../services/UserService';
  *     responses:
  *       200:
  *         description: User deleted successfully
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  */
 
 /**
@@ -242,6 +262,8 @@ import { UserService } from '../services/UserService';
  *     description: Search for users using a name query
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: q
@@ -261,6 +283,8 @@ import { UserService } from '../services/UserService';
  *                 - id: "6a61aded-906a-4801-8543-d1d5ca9e0193"
  *                   name: "John Doe"
  *                   email: "john@example.com"
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  */
 
 /**
@@ -271,6 +295,8 @@ import { UserService } from '../services/UserService';
  *     description: Retrieve blood banks filtered by division and optionally by district
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: divisionId
@@ -314,14 +340,20 @@ import { UserService } from '../services/UserService';
  *         required: true
  *         schema:
  *           type: string
+ *     security:
+ *       - bearerAuth: []
  *   put:
  *     summary: Update user
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  *   delete:
  *     summary: Delete user
  *     tags:
  *       - Users
+ *     security:
+ *       - bearerAuth: []
  */
 
 @Controller('/users')
@@ -332,6 +364,7 @@ export class UserController {
     this.userService = new UserService();
   }
 
+  @Authenticated()
   @Get()
   async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
@@ -358,6 +391,7 @@ export class UserController {
     }
   }
 
+  @Authenticated()
   @Get('/:id')
   async getUserById(req: Request, res: Response): Promise<void> {
     try {
@@ -384,6 +418,7 @@ export class UserController {
     }
   }
 
+  @Authenticated()
   @Post()
   async createUser(req: Request, res: Response): Promise<void> {
     try {
@@ -402,6 +437,7 @@ export class UserController {
     }
   }
 
+  @Authenticated()
   @Put('/:id')
   async updateUser(req: Request, res: Response): Promise<void> {
     try {
@@ -429,6 +465,7 @@ export class UserController {
     }
   }
 
+  @Authenticated()
   @Delete('/:id')
   async deleteUser(req: Request, res: Response): Promise<void> {
     try {
@@ -456,6 +493,7 @@ export class UserController {
     }
   }
 
+  @Authenticated()
   @Get('/search')
   async searchUsers(req: Request, res: Response): Promise<void> {
     try {
@@ -483,6 +521,7 @@ export class UserController {
     }
   }
 
+  @Authenticated()
   @Get('/banks/location')
   async getBanksByLocation(req: Request, res: Response): Promise<void> {
     try {

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { Controller, Post } from '../decorators';
+import { Controller, Post, Authenticated } from '../decorators';
 import { UserService } from '../services/UserService';
+import { generateToken } from '../utils/jwt';
 
 /**
  * @swagger
@@ -42,6 +43,7 @@ import { UserService } from '../services/UserService';
  *           application/json:
  *             example:
  *               success: true
+ *               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImlzcyI6ImhybnNvZnQuY29tIn0..."
  *               data:
  *                 id: "6a61aded-906a-4801-8543-d1d5ca9e0193"
  *                 name: "John Doe"
@@ -68,6 +70,68 @@ import { UserService } from '../services/UserService';
 
 /**
  * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     description: Change password for an authenticated user (requires Bearer token)
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - oldPassword
+ *               - newPassword
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: User ID
+ *               oldPassword:
+ *                 type: string
+ *                 description: Current password
+ *               newPassword:
+ *                 type: string
+ *                 description: New password
+ *           example:
+ *             userId: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *             oldPassword: "Pass@123"
+ *             newPassword: "NewPass@456"
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: "Password changed successfully"
+ *               data:
+ *                 id: "6a61aded-906a-4801-8543-d1d5ca9e0193"
+ *                 name: "John Doe"
+ *                 email: "john.doe@example.com"
+ *       400:
+ *         description: Missing required fields or invalid input
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: "User ID, current password, and new password are required"
+ *       401:
+ *         description: Current password is incorrect, user not found, or missing authorization
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: "Current password is incorrect"
+ */
+
+/**
+ * @swagger
  * /auth/register:
  *   post:
  *     summary: User or bank registration
@@ -86,10 +150,6 @@ import { UserService } from '../services/UserService';
  *               - email
  *               - password
  *               - type
- *               - divisionId
- *               - districtId
- *               - areaId
- *               - registrationDate
  *             properties:
  *               name:
  *                 type: string
@@ -111,9 +171,6 @@ import { UserService } from '../services/UserService';
  *                 type: number
  *               areaId:
  *                 type: number
- *               registrationDate:
- *                 type: string
- *                 format: date-time
  *               props:
  *                 type: object
  *           example:
@@ -122,10 +179,9 @@ import { UserService } from '../services/UserService';
  *             email: "john.doe@example.com"
  *             password: "Pass@123"
  *             type: "user"
- *             divisionId: 1
- *             districtId: 1
- *             areaId: 1
- *             registrationDate: "2024-06-01T00:00:00Z"
+ *             divisionId: null
+ *             districtId: null
+ *             areaId: null
  *             props:
  *               address: "Sheikhpara, Joypurhat"
  *               photo: "https://example.com/photos/john_doe.jpg"
@@ -193,10 +249,23 @@ export class AuthController {
         });
         return;
       }
-      user.password = undefined as unknown as string; // Exclude password from response
+      
+      // Convert to plain object and remove password
+      const userResponse = user.toObject();
+      delete userResponse.password;
+      
+      // Generate JWT token
+      const token = generateToken({
+        userId: user._id,
+        email: user.email,
+        contactNumber: user.contactNumber,
+        name: user.name,
+      });
+      
       res.json({
         success: true,
-        data: user, // Exclude password from response
+        token,
+        data: userResponse,
       });
     } catch (error) {
       res.status(500).json({
@@ -217,11 +286,7 @@ export class AuthController {
         'contactNumber',
         'email',
         'password',
-        'type',
-        'divisionId',
-        'districtId',
-        'areaId',
-        'registrationDate',
+        'type'
       ];
 
       for (const field of requiredFields) {
@@ -245,12 +310,66 @@ export class AuthController {
 
       const user = await this.userService.createUser(userData);
 
+      // Convert to plain object and remove password
+      const userResponse = user.toObject();
+      delete userResponse.password;
+
       res.status(201).json({
         success: true,
-        data: user,
+        data: userResponse,
       });
     } catch (error) {
       res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'An error occurred',
+      });
+    }
+  }
+
+  @Authenticated()
+  @Post('/change-password')
+  async changePassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId, oldPassword, newPassword } = req.body;
+
+      if (!userId || !oldPassword || !newPassword) {
+        res.status(400).json({
+          success: false,
+          message: 'User ID, current password, and new password are required',
+        });
+        return;
+      }
+
+      // Validate that new password is different from old password
+      if (oldPassword === newPassword) {
+        res.status(400).json({
+          success: false,
+          message: 'New password must be different from current password',
+        });
+        return;
+      }
+
+      const user = await this.userService.changePassword(userId, oldPassword, newPassword);
+
+      if (!user) {
+        res.status(401).json({
+          success: false,
+          message: 'User not found',
+        });
+        return;
+      }
+
+      // Convert to plain object and remove password
+      const userResponse = user.toObject();
+      delete userResponse.password;
+
+      res.json({
+        success: true,
+        message: 'Password changed successfully',
+        data: userResponse,
+      });
+    } catch (error) {
+      res.status(401).json({
         success: false,
         message: error instanceof Error ? error.message : 'An error occurred',
       });

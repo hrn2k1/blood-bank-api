@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Controller, Get, Post, Put, Delete } from '../decorators';
+import { Controller, Get, Post, Put, Delete, Authenticated } from '../decorators';
 import { BloodRequestService } from '../services/BloodRequestService';
 
 /**
@@ -17,6 +17,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Retrieve blood requests with optional filters by status, blood group, or urgency
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: status
@@ -54,6 +56,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *                   address: "Sheikhpara, Joypurhat"
  *                   reason: "Surgery"
  *                   donors: []
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  *       500:
  *         $ref: '#/components/responses/ServerError'
  *   post:
@@ -61,6 +65,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Submit a new blood request
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -103,6 +109,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *                 urgencyLevel: "high"
  *       400:
  *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token'
  */
 
 /**
@@ -113,6 +121,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Retrieve a specific blood request with all details
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -139,6 +149,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *                   - donorId: "donor-123"
  *                     unitsDonated: 1
  *                     donationDate: "2024-06-02T00:00:00Z"
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *   put:
@@ -146,6 +158,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Update blood request details
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -163,11 +177,15 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     responses:
  *       200:
  *         description: Blood request updated successfully
+ *       401:
+ *         description: Unauthorized - Missing or invalid Bearer token
  *   delete:
  *     summary: Delete blood request
  *     description: Remove a blood request from the system
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -189,6 +207,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Retrieve all blood requests made by a specific user
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: requesterId
@@ -217,6 +237,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Retrieve all blood requests sent to a specific blood bank
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: bankId
@@ -237,6 +259,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Record a donation for a blood request
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -277,6 +301,8 @@ import { BloodRequestService } from '../services/BloodRequestService';
  *     description: Change the status of a blood request
  *     tags:
  *       - Blood Requests
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -314,6 +340,7 @@ export class BloodRequestController {
     this.bloodRequestService = new BloodRequestService();
   }
 
+  @Authenticated()
   @Get()
   async getAllBloodRequests(req: Request, res: Response): Promise<void> {
     try {
@@ -342,6 +369,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Get('/:id')
   async getBloodRequestById(req: Request, res: Response): Promise<void> {
     try {
@@ -368,6 +396,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Post()
   async createBloodRequest(req: Request, res: Response): Promise<void> {
     try {
@@ -386,6 +415,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Put('/:id')
   async updateBloodRequest(req: Request, res: Response): Promise<void> {
     try {
@@ -413,6 +443,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Delete('/:id')
   async deleteBloodRequest(req: Request, res: Response): Promise<void> {
     try {
@@ -440,6 +471,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Get('/requester/:requesterId')
   async getBloodRequestsByRequesterId(req: Request, res: Response): Promise<void> {
     try {
@@ -458,6 +490,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Get('/bank/:bankId')
   async getBloodRequestsByBankId(req: Request, res: Response): Promise<void> {
     try {
@@ -476,6 +509,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Post('/:id/add-donor')
   async addDonorToRequest(req: Request, res: Response): Promise<void> {
     try {
@@ -509,6 +543,7 @@ export class BloodRequestController {
     }
   }
 
+  @Authenticated()
   @Put('/:id/status')
   async updateBloodRequestStatus(req: Request, res: Response): Promise<void> {
     try {

@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { CONTROLLER_PREFIX_METADATA_KEY, ROUTE_METADATA_KEY, RouteDefinition } from '../decorators';
+import { CONTROLLER_PREFIX_METADATA_KEY, ROUTE_METADATA_KEY, RouteDefinition, AUTHENTICATED_METADATA_KEY } from '../decorators';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 /**
  * Register all decorated controllers and routes
@@ -13,22 +14,28 @@ export function registerControllers(router: Router, controllers: any[]): void {
     routes.forEach((route) => {
       const fullPath = `${prefix}${route.path}`;
       const handler = controllerInstance[route.handlerName].bind(controllerInstance);
+      
+      // Check if route requires authentication
+      const isAuthenticated = Reflect.getMetadata(AUTHENTICATED_METADATA_KEY, controllerInstance, route.handlerName) || false;
+      
+      // Apply auth middleware if route is authenticated
+      const middlewares = isAuthenticated ? [authMiddleware, handler] : [handler];
 
       switch (route.method) {
         case 'get':
-          router.get(fullPath, handler);
+          router.get(fullPath, ...middlewares);
           break;
         case 'post':
-          router.post(fullPath, handler);
+          router.post(fullPath, ...middlewares);
           break;
         case 'put':
-          router.put(fullPath, handler);
+          router.put(fullPath, ...middlewares);
           break;
         case 'delete':
-          router.delete(fullPath, handler);
+          router.delete(fullPath, ...middlewares);
           break;
         case 'patch':
-          router.patch(fullPath, handler);
+          router.patch(fullPath, ...middlewares);
           break;
       }
     });

@@ -44,6 +44,7 @@ export class UserService {
    * Create a new user
    */
   async createUser(userData: Partial<IUser>): Promise<IUser> {
+    userData.registrationDate = new Date();
     const user = new User(userData);
     return user.save();
   }
@@ -96,12 +97,36 @@ export class UserService {
       return null;
     }
 
-    // In production, use bcrypt to compare passwords
-    // For now, direct comparison (not recommended for production)
-    if (user.password !== password) {
+    // Compare password using bcrypt
+    const isPasswordValid = await user.comparePassword(password);
+    
+    if (!isPasswordValid) {
       return null;
     }
 
     return user;
+  }
+
+  /**
+   * Change user password
+   */
+  async changePassword(userId: string, oldPassword: string, newPassword: string): Promise<IUser | null> {
+    // Find user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return null;
+    }
+
+    // Verify old password
+    const isPasswordValid = await user.comparePassword(oldPassword);
+    
+    if (!isPasswordValid) {
+      throw new Error('Current password is incorrect');
+    }
+
+    // Update password
+    user.password = newPassword;
+    return user.save();
   }
 }
