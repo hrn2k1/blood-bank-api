@@ -17,8 +17,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Retrieve all locations with optional filtering by type
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: type
@@ -42,8 +40,6 @@ import { LocationService } from '../services/LocationService';
  *                   parentId: null
  *                   type: "division"
  *                   name: "Dhaka"
- *       401:
- *         description: Unauthorized - Missing or invalid Bearer token
  *   post:
  *     summary: Create location
  *     description: Add a new location to the hierarchy
@@ -86,8 +82,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Retrieve all administrative divisions
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Divisions retrieved successfully
@@ -112,8 +106,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Retrieve all districts under a specific division
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: divisionId
@@ -137,8 +129,6 @@ import { LocationService } from '../services/LocationService';
  *                   parentId: 1
  *                   type: "district"
  *                   name: "Joypurhat"
- *       401:
- *         description: Unauthorized - Missing or invalid Bearer token
  */
 
 /**
@@ -149,8 +139,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Retrieve all thanas (sub-districts) under a specific district
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: districtId
@@ -161,8 +149,6 @@ import { LocationService } from '../services/LocationService';
  *     responses:
  *       200:
  *         description: Thanas retrieved successfully
- *       401:
- *         description: Unauthorized - Missing or invalid Bearer token
  */
 
 /**
@@ -173,8 +159,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Retrieve all areas under a specific thana
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: thanaId
@@ -184,8 +168,6 @@ import { LocationService } from '../services/LocationService';
  *     responses:
  *       200:
  *         description: Areas retrieved successfully
- *       401:
- *         description: Unauthorized - Missing or invalid Bearer token
  */
 
 /**
@@ -196,8 +178,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Retrieve a specific location by its ID
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -217,8 +197,6 @@ import { LocationService } from '../services/LocationService';
  *                 parentId: null
  *                 type: "division"
  *                 name: "Rajshahi"
- *       401:
- *         description: Unauthorized - Missing or invalid Bearer token
  *       404:
  *         $ref: '#/components/responses/NotFound'
  *   put:
@@ -277,8 +255,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Find locations matching a search query
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: q
@@ -311,8 +287,6 @@ import { LocationService } from '../services/LocationService';
  *     description: Retrieve all child locations of a parent location
  *     tags:
  *       - Locations
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: parentId
@@ -336,8 +310,6 @@ import { LocationService } from '../services/LocationService';
  *                   parentId: 1
  *                   type: "district"
  *                   name: "Natore"
- *       401:
- *         description: Unauthorized - Missing or invalid Bearer token
  */
 
 @Controller('/locations')
@@ -348,7 +320,6 @@ export class LocationController {
     this.locationService = new LocationService();
   }
 
-  @Authenticated()
   @Get()
   async getAllLocations(req: Request, res: Response): Promise<void> {
     try {
@@ -373,7 +344,6 @@ export class LocationController {
     }
   }
 
-  @Authenticated()
   @Get('/divisions')
   async getDivisions(req: Request, res: Response): Promise<void> {
     try {
@@ -391,7 +361,6 @@ export class LocationController {
     }
   }
 
-  @Authenticated()
   @Get('/districts/:divisionId')
   async getDistrictsByDivision(req: Request, res: Response): Promise<void> {
     try {
@@ -410,7 +379,6 @@ export class LocationController {
     }
   }
 
-  @Authenticated()
   @Get('/thanas/:districtId')
   async getThanasByDistrict(req: Request, res: Response): Promise<void> {
     try {
@@ -429,7 +397,6 @@ export class LocationController {
     }
   }
 
-  @Authenticated()
   @Get('/areas/:thanaId')
   async getAreasByThana(req: Request, res: Response): Promise<void> {
     try {
@@ -448,7 +415,6 @@ export class LocationController {
     }
   }
 
-  @Authenticated()
   @Get('/:id')
   async getLocationById(req: Request, res: Response): Promise<void> {
     try {
@@ -550,7 +516,6 @@ export class LocationController {
     }
   }
 
-  @Authenticated()
   @Get('/search')
   async searchLocations(req: Request, res: Response): Promise<void> {
     try {
@@ -578,7 +543,6 @@ export class LocationController {
     }
   }
 
-  @Authenticated()
   @Get('/children/:parentId')
   async getChildLocations(req: Request, res: Response): Promise<void> {
     try {
